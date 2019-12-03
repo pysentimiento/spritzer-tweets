@@ -1,19 +1,27 @@
 # English Tweets
 
-Tweets procesados del ["Spritzer" Twitter archive](https://archive.org/details/archiveteam-twitter-stream-2019-05)
+Download and process tweets from the ["Spritzer" Twitter archive](https://archive.org/details/archiveteam-twitter-stream-2019-05)
 
+## Requires
 
+`python >= 3.6`
 
-1. Bajar datos
+## What to do
+
+1. Download data
 
 ```
 python bin/get_data.py
 ```
 
-Esto va a tardar *horas*
+Warning: this will take *hours*
 
-2. Descomprimirlos
+
+2. Unzip data
 
 ```
-python bin/unzip_data.py
+cd data
+find . -name "*.tar" | xargs tar xf
+find . -name *.bz2 | xargs bzip2 -d
+cd ..
 ```
