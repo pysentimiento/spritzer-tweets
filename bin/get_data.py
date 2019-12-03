@@ -13,4 +13,4 @@ if __name__ == '__main__':
             print(f"{filename} ya bajado")
         else:
             print(f"{filename} no existe, bajando")
-            os.system(f"wget {url} -o {path}")
+            os.system(f"wget {url} -P data/")
