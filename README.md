@@ -21,7 +21,7 @@ Warning: this will take *hours*
 
 ```
 cd data
-find . -name "*.tar" | xargs tar xf
-find . -name *.bz2 | xargs bzip2 -d
+find . -name "*.tar" | xargs -n1 tar xf
+find . -name *.bz2 | xargs -n1 bzip2 -d
 cd ..
 ```
