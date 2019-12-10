@@ -8,6 +8,12 @@ Download and process tweets from the ["Spritzer" Twitter archive](https://archiv
 
 ## What to do
 
+0. Install requirements
+
+```
+pip install requirements.txt
+```
+
 1. Download data
 
 ```
@@ -24,4 +30,10 @@ cd data
 find . -name "*.tar" | xargs -n1 tar xf
 find . -name *.bz2 | xargs -n1 bzip2 -d
 cd ..
+```
+
+3. Generate plain text file
+
+```
+python bin/generate_text_file tweets.txt
 ```
