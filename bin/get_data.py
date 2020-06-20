@@ -1,10 +1,20 @@
 import os
+import fire
 import subprocess
 
-base="https://archive.org/download/archiveteam-twitter-stream-2019-05/twitter_stream_2019_05_{:02}.tar"
+urls = {
+    2019: {
+        5: {
+            "base": "https://archive.org/download/archiveteam-twitter-stream-2019-05/twitter_stream_2019_05_{:02}.tar",
+            "range": range(1, 32),
+        }
+    }
+}
 
 if __name__ == '__main__':
     for i in range(1, 32):
+        base = urls[2019][5]["base"]
+
         url = base.format(i)
 
         filename = os.path.basename(url)
