@@ -28,7 +28,8 @@ Warning: this will take *hours*
 ```
 cd data
 find . -name "*.tar" | xargs -n1 tar xf
-find . -name *.bz2 | xargs -n1 bzip2 -d
+# -P4 is for 4 parallel processes
+find . -name *.bz2 | xargs -n1 bzip2 _P4 -d
 cd ..
 ```
 
