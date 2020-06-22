@@ -1,0 +1,3 @@
+[submodule "tweepyrate"]
+	path = tweepyrate
+	url = git@github.com:finiteautomata/tweepyrate.git

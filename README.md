@@ -38,3 +38,15 @@ cd ..
 ```
 python bin/generate_text_file tweets.txt
 ```
+
+or...
+
+Save to mongo database
+
+```
+python bin/save_to_mongo.py <mongo_db> <lang>
+```
+
+Note that `bin/save_to_mongo.py` also erases files as they are processed
+
+## Scraping more data from users
