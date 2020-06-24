@@ -34,6 +34,12 @@ def save_tweets_from_user(user_id, db, app):
         except pymongo.errors.DuplicateKeyError as e:
             continue
 
+def set_user_as_processed(db, user_id):
+    db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {"processed": True}},
+    )
+
 
 def get_tweets_from_users(database, app_file):
     """
@@ -61,6 +67,7 @@ def get_tweets_from_users(database, app_file):
     print("Ensuring indices")
 
     db.tweets.create_index("tweet_id", unique=True)
+    db.tweets.create_index("user_id")
     db.users.create_index("user_id", unique=True)
 
     pbar = tqdm(total=db.users.count({"processed": {"$ne": True}}))
@@ -74,15 +81,27 @@ def get_tweets_from_users(database, app_file):
             while not stopping.is_set():
                 try:
                     user_id = q.get(True, timeout)
-                    save_tweets_from_user(user_id, db, app)
-                    db.users.update_one(
-                        {"user_id": user_id},
-                        {"$set": {"processed": True}},
-                    )
+                    user = db.users.find_one({"user_id": user_id})
+
+                    if db.tweets.count({"user_id": user_id}) > 50:
+                        print(f"Skipping {user_id} -- already processed")
+                    elif user["followers_count"] < 10:
+                        print(f"Skipping {user_id} -- less than 10 followers")
+                    else:
+                        save_tweets_from_user(user_id, db, app)
+                    set_user_as_processed(db, user_id)
                     pbar.update()
                     q.task_done()
                 except tweepy.TweepError as e:
-                    print(e)
+                    if e.api_code == 34:
+                        """
+                        Deleted user
+                        """
+                        set_user_as_processed(db, user_id)
+                    elif "Not authorized" in e.reason:
+                        set_user_as_processed(db, user_id)
+                    else:
+                        print(f"{user_id} -- {e}")
                     q.task_done()
                     pbar.update()
                 except queue.Empty:
