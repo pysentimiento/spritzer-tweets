@@ -3,6 +3,8 @@ import fire
 import json
 import glob
 import pymongo
+import nltk
+import multiprocessing
 from tqdm import tqdm
 
 def generate_from_path(base_directory, output_path, num_files):
@@ -42,18 +44,37 @@ def generate_from_path(base_directory, output_path, num_files):
             f.write(text+"\n")
     print(f"Tweets written to {output_path}")
 
+def tweet_tokenize(tweet):
+    tweet = tweet["text"]
+    tokenizer = nltk.TweetTokenizer(strip_handles=False, reduce_len=True)
+    tokens = tokenizer.tokenize(tweet)
+    ret = []
+    for tok in tokens:
+        if tok[0] == "@":
+            ret.append("@user")
+        elif tok[0] == "#":
+            ret.append(tok[1:])
+        else:
+            ret.append(tok)
+    return ret
+
 
 def generate_from_mongo(database, output_path):
     client = pymongo.MongoClient()
     db = client[database]
 
     tweets = db.tweets.find({}, {"text": 1})
+    """
+    Preprocess text file with tweets
+    """
 
     pbar = tqdm(tweets, total=db.tweets.count())
-
-    with open(output_path, "w+") as f:
-        for tweet in pbar:
-            f.write(tweet["text"]+"\n")
+    with multiprocessing.Pool(10) as p:
+        with open(output_path, "w+") as f:
+            for tokens in p.imap(tweet_tokenize, tweets):
+                tweet = " ".join(tokens)
+                f.write(tweet+"\n")
+                pbar.update()
 
     print(f"Tweets written to {output_path}")
 
