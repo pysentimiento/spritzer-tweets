@@ -1,4 +1,4 @@
-# English Tweets
+# Spritzer Tweets
 
 Download and process tweets from the ["Spritzer" Twitter archive](https://archive.org/details/archiveteam-twitter-stream-2019-05)
 
@@ -11,7 +11,9 @@ Download and process tweets from the ["Spritzer" Twitter archive](https://archiv
 0. Install requirements
 
 ```
-pip install requirements.txt
+git submodule init
+git submodule update
+pip install -r requirements.txt
 ```
 
 1. Download data
