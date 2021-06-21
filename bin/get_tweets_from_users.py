@@ -70,7 +70,7 @@ def get_tweets_from_users(database, app_file):
     db.tweets.create_index("user_id")
     db.users.create_index("user_id", unique=True)
 
-    pbar = tqdm(total=db.users.count({"processed": {"$ne": True}}))
+    pbar = tqdm(total=db.users.count_documents({"processed": {"$ne": True}}))
     q = queue.Queue()
     stopping = threading.Event()
 
@@ -83,7 +83,7 @@ def get_tweets_from_users(database, app_file):
                     user_id = q.get(True, timeout)
                     user = db.users.find_one({"user_id": user_id})
 
-                    if db.tweets.count({"user_id": user_id}) > 50:
+                    if db.tweets.count_documents({"user_id": user_id}) > 50:
                         print(f"Skipping {user_id} -- already processed")
                     elif user["followers_count"] < 10:
                         print(f"Skipping {user_id} -- less than 10 followers")

@@ -51,4 +51,15 @@ python bin/save_to_mongo.py <mongo_db> <lang>
 
 Note that `bin/save_to_mongo.py` also erases files as they are processed
 
+
 ## Scraping more data from users
+
+After saving to mongo, one thing we can do to expand our database is to fetch tweets from the user we got in the previous stage.
+
+To do so, just run
+
+```
+python get_tweets_from_users.py <mongo_db> <app_files>
+```
+
+Beware that this will take days too! So run it and go do something else
