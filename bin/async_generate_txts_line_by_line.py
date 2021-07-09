@@ -21,31 +21,28 @@ def my_preprocess(tweet):
     ret = re.sub(r"\s+", " ", ret)
     return ret.strip()
 
-async def process_user(user, path):
-    """
-    Process a single user's tweets and save
-    """
-    if os.path.exists(path) or len(user["tweets"]) < 10:
-        return
+async def process_tweet(tweet, out_dir):
+    user_id = tweet["user_id"]
+    screen_name = tweet["screen_name"]
+    file_path = os.path.join(out_dir, f"{screen_name.lower()}-{user_id}.txt")
 
-    async with aiofiles.open(path, "w+") as f:
-        for tweet in user["tweets"]:
-            tweet = my_preprocess(tweet["text"])
-            await f.write(tweet + "\n")
+    async with aiofiles.open(file_path, "a+") as f:
+        tweet_text = tweet['text']#my_preprocess(tweet["text"])
+        await f.write(tweet_text + "\n")
 
 
 async def worker(name, queue, pbar, out_dir):
     while True:
         # Get a "work item" out of the queue.
-        user = await queue.get()
+        tweet = await queue.get()
 
         # Sleep for the "sleep_for" seconds.
-        file_path = os.path.join(out_dir, f"{user['screen_name'].lower()}-{user['id']}.txt")
-        await process_user(user, file_path)
+        await process_tweet(tweet, out_dir)
 
         # Notify the queue that the "work item" has been processed.
         pbar.update()
         queue.task_done()
+
 
 async def main(database, out_dir, preprocess, num_workers):
     """
@@ -55,43 +52,33 @@ async def main(database, out_dir, preprocess, num_workers):
     client = motor.motor_asyncio.AsyncIOMotorClient()
     db = client[database]
 
-    query = {
-        "processed": True
-    }
     print("Contando...")
-    total_users = await db.users.count_documents(query)
 
-    print("Buscando usuarios...")
-    users_and_tweets = db.users.aggregate([
-        {"$match": query},
-        {"$lookup": {"from": "tweets", "localField": "id", "foreignField": "user_id", "as":"tweets"}},
-        {"$project": {"id": 1, "screen_name": 1, "tweets.text": 1}},
-    ])
+    tweets = db.tweets.find()
+    pbar = tqdm(total=await db.tweets.estimated_document_count())
 
-    pbar = tqdm(total=total_users)
-
+    print("Comenzando!")
 
     queue = asyncio.Queue()
 
 
     # Create three worker tasks to process the queue concurrently.
-    print(f"Creando {num_workers} workers")
     tasks = []
     for i in range(num_workers):
         task = asyncio.create_task(worker(f'worker-{i}', queue, pbar, out_dir))
         tasks.append(task)
 
-    print("Comenzando!")
-    async for user in users_and_tweets:
-        queue.put_nowait(user)
 
+    # Generate random timings and put them into the queue.
+    total_sleep_time = 0
+    async for tweet in tweets:
+        queue.put_nowait(tweet)
 
     await queue.join()
     for task in tasks:
         task.cancel()
     # Wait until all worker tasks are cancelled.
     await asyncio.gather(*tasks, return_exceptions=True)
-
 
 def generate_txts_for_users(database, out_dir, preprocess=False, num_workers=8):
     """
