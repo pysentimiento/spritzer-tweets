@@ -21,30 +21,30 @@ def my_preprocess(tweet):
     ret = re.sub(r"\s+", " ", ret)
     return ret.strip()
 
-async def process_tweet(tweet, out_dir):
-    user_id = tweet["user_id"]
-    screen_name = tweet["screen_name"]
-    file_path = os.path.join(out_dir, f"{screen_name.lower()}-{user_id}.txt")
-
-    async with aiofiles.open(file_path, "a+") as f:
-        tweet_text = tweet['text']#my_preprocess(tweet["text"])
-        await f.write(tweet_text + "\n")
 
 
-async def worker(name, queue, pbar, out_dir):
-    while True:
-        # Get a "work item" out of the queue.
-        tweet = await queue.get()
+async def worker(name, queue, pbar, out_dir, minimal_preprocess):
+    file_path = os.path.join(out_dir, f"{name}.txt")
 
-        # Sleep for the "sleep_for" seconds.
-        await process_tweet(tweet, out_dir)
+    async with aiofiles.open(file_path, "w+") as f:
+        tweets = []
+        while True:
+            # Get a "work item" out of the queue.
+            tweet = await queue.get()
 
-        # Notify the queue that the "work item" has been processed.
-        pbar.update()
-        queue.task_done()
+            # Sleep for the "sleep_for" seconds.
+            tweets.append(my_preprocess(tweet["text"]))
+
+            if len(tweets) > 4_000:
+                await f.write("\n".join(tweets) + "\n")
+                tweets = []
+
+            # Notify the queue that the "work item" has been processed.
+            pbar.update()
+            queue.task_done()
 
 
-async def main(database, out_dir, preprocess, num_workers):
+async def main(database, out_dir, preprocess, num_workers=32):
     """
     Event loop
     """
@@ -65,7 +65,7 @@ async def main(database, out_dir, preprocess, num_workers):
     # Create three worker tasks to process the queue concurrently.
     tasks = []
     for i in range(num_workers):
-        task = asyncio.create_task(worker(f'worker-{i}', queue, pbar, out_dir))
+        task = asyncio.create_task(worker(f'spanish-tweets-{str(i).zfill(3)}', queue, pbar, out_dir))
         tasks.append(task)
 
 
