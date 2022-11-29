@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "spritzer-tweets"
+version = "0.1.0"
+description = ""
+authors = ["Juan Manuel Pérez <jmperez.85@gmail.com>"]
+readme = "README.md"
+packages = [{include = "spritzer_tweets"}]
+
+[tool.poetry.dependencies]
+python = ">=3.8, <3.11"
+fire = "*"
+pymongo = "3.10.1"
+tqdm = "*"
+tweepyrate = {path="./tweepyrate", develop=true}
+pysentimiento = "^0.5.2"
+datasets = "^2.7.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

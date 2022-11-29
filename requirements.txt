@@ -1,7 +1,0 @@
-fire==0.2.1
-pymongo==3.10.1
-tqdm==4.50.0
--e tweepyrate/
-aiofiles
-pysentimiento==0.2.2
-datasets==2.7.1
