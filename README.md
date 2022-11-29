@@ -63,3 +63,11 @@ python get_tweets_from_users.py <mongo_db> <app_files>
 ```
 
 Beware that this will take days too! So run it and go do something else
+
+## Generating txt dumps
+
+To dump everything
+
+```
+python bin/async_generate_txts_line_by_line.py spritzer-tweets dumps/spanish_tweets --num_workers 100
+```

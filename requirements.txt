@@ -4,3 +4,4 @@ tqdm==4.50.0
 -e tweepyrate/
 aiofiles
 pysentimiento==0.2.2
+datasets==2.7.1
