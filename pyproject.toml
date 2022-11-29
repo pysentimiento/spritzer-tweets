@@ -14,6 +14,11 @@ tqdm = "*"
 tweepyrate = {path="./tweepyrate", develop=true}
 pysentimiento = "^0.5.2"
 datasets = "^2.7.1"
+orjson = "^3.8.2"
+aiofiles = "^22.1.0"
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.17.1"
 
 [build-system]
 requires = ["poetry-core"]
