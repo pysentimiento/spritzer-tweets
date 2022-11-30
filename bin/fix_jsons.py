@@ -9,17 +9,19 @@ import json
 import gzip
 import glob
 import orjson
-import aiofiles
 import os
 from async_files import FileIO
+
 
 class MyGzipFile(FileIO):
     OPEN = GzipFile
 
-def process_tweet(tweet:dict) -> dict:
+
+def process_tweet(tweet: dict) -> dict:
     return {
-        k:str(v) for k, v in tweet.items() if k in ["tweet_id", "text", "user_id"]
+        k: str(v) for k, v in tweet.items() if k in ["tweet_id", "text", "user_id"]
     }
+
 
 async def process_file(path, output_path):
     print(f"Converting {path} to {output_path}")
@@ -35,7 +37,7 @@ async def process_file(path, output_path):
 
 async def main(input_dir, output_dir):
     # List gz files in input_path
-    files = glob.glob(os.path.join(input_dir, "*.gz"))[:10]
+    files = glob.glob(os.path.join(input_dir, "*.gz"))
 
     print(files)
 
@@ -50,14 +52,11 @@ async def main(input_dir, output_dir):
     await asyncio.gather(*tasks)
 
 
-
-
 def fix_jsons(input_path, output_path):
     """
     Fix json dump from MongoDB
     """
     return asyncio.run(main(input_path, output_path))
-
 
 
 if __name__ == "__main__":
