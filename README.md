@@ -1,3 +1,5 @@
+# DEPRECATED: This project is out of support due to several changes in the Twitter (and hence, `tweepy`) API.
+
 # Spritzer Tweets
 
 Download and process tweets from the ["Spritzer" Twitter archive](https://archive.org/details/archiveteam-twitter-stream-2019-05)
