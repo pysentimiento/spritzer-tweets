@@ -41,7 +41,7 @@ def set_user_as_processed(db, user_id):
     )
 
 
-def get_tweets_from_users(database, app_file):
+def get_tweets_from_users(database, app_file, users=None):
     """
     Save tweets to mongo
 
@@ -59,7 +59,7 @@ def get_tweets_from_users(database, app_file):
 
     apps = create_apps(app_file)
     for app in apps:
-        print(app.me().screen_name)
+        print(app.name)
     print(f"Connecting to {database}")
     client = pymongo.MongoClient()
     db = client[database]
@@ -70,7 +70,13 @@ def get_tweets_from_users(database, app_file):
     db.tweets.create_index("user_id")
     db.users.create_index("user_id", unique=True)
 
-    pbar = tqdm(total=db.users.count_documents({"processed": {"$ne": True}}))
+    #
+
+    if users is not None:
+        pbar = tqdm(total=len(users))
+    else:
+        pbar = tqdm(total=db.users.count_documents({"processed": {"$ne": True}}))
+
     q = queue.Queue()
     stopping = threading.Event()
 
@@ -114,7 +120,16 @@ def get_tweets_from_users(database, app_file):
         t.start()
         threads.append(t)
 
-    for user in db.users.find({"processed": {"$ne": True}}, {"user_id": 1}):
+    if users:
+        user_names = users
+        users = [app.get_user(user_name)._json for user_name in user_names]
+        # set user_id
+        for user in users:
+            user["user_id"] = user["id"]
+    else:
+        users = db.users.find({"processed": {"$ne": True}}, {"user_id": 1})
+
+    for user in users:
         q.put(user["user_id"])
 
     q.join()
