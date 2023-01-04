@@ -4,16 +4,17 @@ Download and process tweets from the ["Spritzer" Twitter archive](https://archiv
 
 ## Requires
 
-`python >= 3.6`
+`python >= 3.8` and `poetry`
 
 ## What to do
 
 0. Install requirements
 
 ```
+pip install poetry
 git submodule init
 git submodule update
-pip install -r requirements.txt
+poetry install
 ```
 
 1. Download data
